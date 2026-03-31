@@ -1,0 +1,24 @@
+{
+  "name": "project_2",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "init-db": "node src/scripts/init_db.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.25.3",
+    "cors": "^2.8.6",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "googleapis": "^170.1.0",
+    "mysql2": "^3.16.2",
+    "openai": "^6.16.0",
+    "server-destroy": "^1.0.1"
+  }
+}
