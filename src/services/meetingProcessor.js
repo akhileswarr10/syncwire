@@ -84,38 +84,38 @@ CRITICAL DATE RULE: All task 'deadline' dates MUST be in the future relative to 
         }
 
         // 2. Save to Database
-        const connection = await pool.getConnection();
+        const client = await pool.connect();
         let meetingId;
 
         try {
-            await connection.beginTransaction();
+            await client.query('BEGIN');
 
-            const [meetingResult] = await connection.execute(
-                'INSERT INTO meetings (title, summary, transcript, date) VALUES (?, ?, ?, ?)',
+            const meetingResult = await client.query(
+                'INSERT INTO meetings (title, summary, transcript, date) VALUES ($1, $2, $3, $4) RETURNING id',
                 [analysis.title, analysis.summary, transcript, new Date()]
             );
-            meetingId = meetingResult.insertId;
+            meetingId = meetingResult.rows[0].id;
 
             if (analysis.tasks && analysis.tasks.length > 0) {
                 for (const task of analysis.tasks) {
                     const magicToken = crypto.randomBytes(32).toString('hex');
-                    const [taskResult] = await connection.execute(
-                        'INSERT INTO tasks (meeting_id, assignee_email, description, detailed_context, deadline, task_status, magic_token) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                    const taskResult = await client.query(
+                        'INSERT INTO tasks (meeting_id, assignee_email, description, detailed_context, deadline, task_status, magic_token) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id',
                         [meetingId, task.assignee_email, task.description, task.detailed_context, task.deadline, 'pending', magicToken]
                     );
-                    task.id = taskResult.insertId;
+                    task.id = taskResult.rows[0].id;
                     task.magic_token = magicToken;
                 }
             }
 
-            await connection.commit();
+            await client.query('COMMIT');
             console.log(`Meeting processed and saved with ID: ${meetingId}`);
 
         } catch (dbError) {
-            await connection.rollback();
+            await client.query('ROLLBACK');
             throw dbError;
         } finally {
-            connection.release();
+            client.release();
         }
 
         // 3. Execute MCP Actions (Email, etc.)
@@ -270,8 +270,8 @@ ${magicLink}
                 try {
                     const resultData = JSON.parse(rawResult);
                     if (resultData.id) {
-                        await pool.execute(
-                            'UPDATE tasks SET calendar_event_id = ? WHERE id = ?',
+                        await pool.query(
+                            'UPDATE tasks SET calendar_event_id = $1 WHERE id = $2',
                             [resultData.id, task.id]
                         );
                         console.log(`[CALENDAR] Saved event ID ${resultData.id} for task ${task.id}`);

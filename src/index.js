@@ -19,7 +19,7 @@ const { processTranscript } = require('./services/meetingProcessor');
 // Route to get all tasks
 app.get('/api/tasks', async (req, res) => {
     try {
-        const [rows] = await pool.execute(`
+        const { rows } = await pool.query(`
             SELECT t.*, m.title as meeting_title, m.transcript as meeting_transcript 
             FROM tasks t 
             JOIN meetings m ON t.meeting_id = m.id 
@@ -35,11 +35,11 @@ app.get('/api/tasks', async (req, res) => {
 // GET task by Magic Token
 app.get('/api/tasks/token/:token', async (req, res) => {
     try {
-        const [rows] = await pool.execute(`
+        const { rows } = await pool.query(`
             SELECT t.*, m.title as meeting_title, m.summary as meeting_summary 
             FROM tasks t 
             JOIN meetings m ON t.meeting_id = m.id 
-            WHERE t.magic_token = ?
+            WHERE t.magic_token = $1
         `, [req.params.token]);
 
         if (rows.length === 0) {
@@ -56,11 +56,11 @@ app.get('/api/tasks/token/:token', async (req, res) => {
 app.post('/api/tasks/update-status', async (req, res) => {
     const { token, status } = req.body;
     try {
-        const [result] = await pool.execute(
-            'UPDATE tasks SET task_status = ? WHERE magic_token = ?',
+        const result = await pool.query(
+            'UPDATE tasks SET task_status = $1 WHERE magic_token = $2',
             [status, token]
         );
-        if (result.affectedRows === 0) return res.status(404).json({ error: 'Task not found' });
+        if (result.rowCount === 0) return res.status(404).json({ error: 'Task not found' });
         res.json({ message: `Task status updated to ${status}` });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -71,11 +71,11 @@ app.post('/api/tasks/update-status', async (req, res) => {
 app.post('/api/tasks/request-extension', async (req, res) => {
     const { token, reason, requestedDeadline } = req.body;
     try {
-        const [result] = await pool.execute(
-            'UPDATE tasks SET task_status = ?, reason_for_delay = ?, requested_deadline = ? WHERE magic_token = ?',
+        const result = await pool.query(
+            'UPDATE tasks SET task_status = $1, reason_for_delay = $2, requested_deadline = $3 WHERE magic_token = $4',
             ['extension_requested', reason, requestedDeadline, token]
         );
-        if (result.affectedRows === 0) return res.status(404).json({ error: 'Task not found' });
+        if (result.rowCount === 0) return res.status(404).json({ error: 'Task not found' });
         res.json({ message: 'Extension request submitted successfully' });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -87,13 +87,13 @@ app.post('/api/tasks/approve-extension', async (req, res) => {
     const { taskId } = req.body;
     try {
         // 1. Get task details
-        const [rows] = await pool.execute('SELECT * FROM tasks WHERE id = ?', [taskId]);
+        const { rows } = await pool.query('SELECT * FROM tasks WHERE id = $1', [taskId]);
         if (rows.length === 0) return res.status(404).json({ error: 'Task not found' });
         const task = rows[0];
 
-        // 2. Update status and deadline in MySQL
-        await pool.execute(
-            'UPDATE tasks SET task_status = ?, deadline = ?, requested_deadline = NULL WHERE id = ?',
+        // 2. Update status and deadline in PostgreSQL
+        await pool.query(
+            'UPDATE tasks SET task_status = $1, deadline = $2, requested_deadline = NULL WHERE id = $3',
             ['extended', task.requested_deadline, taskId]
         );
 
