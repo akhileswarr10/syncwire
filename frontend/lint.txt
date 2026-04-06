@@ -1,0 +1,55 @@
+﻿
+> frontend@0.1.0 lint
+> eslint
+
+
+D:\mini_Project\Project_2\frontend\src\app\task-update\[token]\page.tsx
+   48:27  error    Unexpected any. Specify a different type                                                                                                               @typescript-eslint/no-explicit-any
+   69:18  warning  'err' is defined but never used                                                                                                                        @typescript-eslint/no-unused-vars
+   90:18  warning  'err' is defined but never used                                                                                                                        @typescript-eslint/no-unused-vars
+  124:17  error    Do not use an `<a>` element to navigate to `/`. Use `<Link />` from `next/link` instead. See: https://nextjs.org/docs/messages/no-html-link-for-pages  @next/next/no-html-link-for-pages
+  141:21  error    Do not use an `<a>` element to navigate to `/`. Use `<Link />` from `next/link` instead. See: https://nextjs.org/docs/messages/no-html-link-for-pages  @next/next/no-html-link-for-pages
+
+D:\mini_Project\Project_2\frontend\src\components\ThemeProvider.tsx
+  29:5  error  Error: Cannot access variable before it is declared
+
+`applyTheme` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+D:\mini_Project\Project_2\frontend\src\components\ThemeProvider.tsx:29:5
+  27 |     const initial: Theme = stored === 'light' ? 'light' : 'dark';
+  28 |     setTheme(initial);
+> 29 |     applyTheme(initial);
+     |     ^^^^^^^^^^ `applyTheme` accessed before it is declared
+  30 |   }, []);
+  31 |
+  32 |   function applyTheme(t: Theme) {
+
+D:\mini_Project\Project_2\frontend\src\components\ThemeProvider.tsx:32:3
+  30 |   }, []);
+  31 |
+> 32 |   function applyTheme(t: Theme) {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 33 |     const root = document.documentElement;
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 34 |     if (t === 'dark') {
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 35 |       root.classList.add('dark');
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 36 |     } else {
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 37 |       root.classList.remove('dark');
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 38 |     }
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 39 |   }
+     | ^^^^ `applyTheme` is declared here
+  40 |
+  41 |   function toggle() {
+  42 |     setTheme((prev) => {  react-hooks/immutability
+
+D:\mini_Project\Project_2\frontend\src\components\TranscriptInput.tsx
+   5:10  warning  'cn' is defined but never used            @typescript-eslint/no-unused-vars
+  61:23  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+Γ£û 8 problems (5 errors, 3 warnings)
+

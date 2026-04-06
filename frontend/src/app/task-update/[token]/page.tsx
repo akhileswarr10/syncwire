@@ -2,15 +2,16 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
+import Link from 'next/link';
 import {
     CheckCircle,
     Clock,
     Calendar,
     AlertCircle,
     Loader2,
-    ArrowRight,
     Send,
-    CheckCircle2
+    CheckCircle2,
+    Zap
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -45,8 +46,8 @@ export default function TaskUpdatePage() {
                 if (!res.ok) throw new Error('Invalid or expired magic link');
                 const data = await res.json();
                 setTask(data);
-            } catch (err: any) {
-                setError(err.message);
+            } catch (err) {
+                setError(err instanceof Error ? err.message : 'An unknown error occurred');
             } finally {
                 setLoading(false);
             }
@@ -66,7 +67,7 @@ export default function TaskUpdatePage() {
                 setSuccessMsg(`Task successfully marked as ${status}!`);
                 setTask(prev => prev ? { ...prev, task_status: status } : null);
             }
-        } catch (err) {
+        } catch {
             setError('Failed to update task');
         } finally {
             setSubmitting(false);
@@ -87,7 +88,7 @@ export default function TaskUpdatePage() {
                 setShowExtension(false);
                 setTask(prev => prev ? { ...prev, task_status: 'extension_requested' } : null);
             }
-        } catch (err) {
+        } catch {
             setError('Failed to submit request');
         } finally {
             setSubmitting(false);
@@ -95,123 +96,252 @@ export default function TaskUpdatePage() {
     };
 
     if (loading) return (
-        <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center">
-            <Loader2 className="w-12 h-12 text-indigo-500 animate-spin mb-4" />
-            <p className="text-slate-400 font-medium">Verifying Secure Link...</p>
+        <div
+            className="min-h-screen flex flex-col items-center justify-center gap-3"
+            style={{ background: 'var(--sw-bg)' }}
+        >
+            <div
+                className="w-10 h-10 border-[3px] rounded-full animate-spin"
+                style={{ borderColor: 'var(--sw-border)', borderTopColor: 'var(--sw-indigo)' }}
+            />
+            <p className="text-sm font-medium" style={{ color: 'var(--sw-text-3)' }}>
+                Verifying secure link…
+            </p>
         </div>
     );
 
     if (error) return (
-        <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6">
-            <div className="max-w-md w-full bg-slate-900 border border-red-500/20 p-8 rounded-3xl text-center">
-                <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-6" />
-                <h1 className="text-2xl font-bold text-slate-100 mb-2">Invalid Link</h1>
-                <p className="text-slate-500 mb-8">{error}</p>
-                <a href="/" className="inline-block px-8 py-3 bg-slate-800 text-slate-100 rounded-2xl hover:bg-slate-700 transition-all">
+        <div
+            className="min-h-screen flex items-center justify-center p-6"
+            style={{ background: 'var(--sw-bg)' }}
+        >
+            <div
+                className="max-w-md w-full p-8 rounded-2xl border text-center"
+                style={{ background: 'var(--sw-bg-2)', borderColor: 'var(--sw-red)', boxShadow: 'var(--sw-shadow-lg)' }}
+            >
+                <AlertCircle className="w-12 h-12 mx-auto mb-4" style={{ color: 'var(--sw-red)' }} />
+                <h1 className="text-xl font-bold mb-2" style={{ color: 'var(--sw-text-1)' }}>Invalid Link</h1>
+                <p className="text-sm mb-6" style={{ color: 'var(--sw-text-2)' }}>{error}</p>
+                <Link
+                    href="/"
+                    className="inline-block px-6 py-2.5 rounded-xl text-sm font-semibold transition-all"
+                    style={{ background: 'var(--sw-bg-3)', color: 'var(--sw-text-1)', border: '1px solid var(--sw-border)' }}
+                >
                     Go to Dashboard
-                </a>
+                </Link>
             </div>
         </div>
     );
 
     return (
-        <div className="min-h-screen bg-slate-950 text-slate-100 py-12 px-6">
-            <div className="max-w-3xl mx-auto space-y-8">
-                {/* Header */}
-                <div className="bg-indigo-600/10 border border-indigo-500/20 p-8 rounded-[2.5rem] relative overflow-hidden">
-                    <div className="relative z-10">
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="px-3 py-1 bg-indigo-600 text-[10px] font-bold uppercase tracking-widest rounded-full">
-                                Secure Magic Link
-                            </div>
-                            <div className={cn(
-                                "px-3 py-1 text-[10px] font-bold uppercase tracking-widest rounded-full",
-                                task?.task_status === 'completed' ? "bg-emerald-600/20 text-emerald-400" : "bg-slate-800 text-slate-400"
-                            )}>
-                                {task?.task_status}
-                            </div>
-                        </div>
-                        <h1 className="text-4xl font-extrabold mb-4">{task?.description}</h1>
-                        <p className="text-slate-400 leading-relaxed text-lg max-w-2xl italic">
-                            "{task?.detailed_context}"
-                        </p>
-                    </div>
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-600/5 blur-[100px] -mr-32 -mt-32" />
+        <div className="min-h-screen py-10 px-5 sw-mesh-bg" style={{ background: 'var(--sw-bg)' }}>
+            <div className="max-w-2xl mx-auto space-y-5">
+
+                {/* Top bar */}
+                <div className="flex items-center justify-between mb-2">
+                    <Link
+                        href="/"
+                        className="flex items-center gap-2 text-sm font-semibold"
+                        style={{ color: 'var(--sw-text-2)' }}
+                    >
+                        <Zap className="w-4 h-4" style={{ color: 'var(--sw-indigo)' }} />
+                        SyncWire
+                    </Link>
+                    <span
+                        className="sw-badge sw-badge-indigo"
+                        style={{ background: 'var(--sw-indigo-subtle)', color: 'var(--sw-indigo)' }}
+                    >
+                        🔒 Secure Link
+                    </span>
                 </div>
 
-                {/* Success Alert */}
+                {/* Task header card */}
+                <div
+                    className="rounded-2xl border p-6 relative overflow-hidden"
+                    style={{
+                        background: 'var(--sw-bg-2)',
+                        borderColor: 'var(--sw-border)',
+                        boxShadow: 'var(--sw-shadow)',
+                    }}
+                >
+                    <div
+                        className="absolute inset-0 pointer-events-none"
+                        style={{
+                            background: 'radial-gradient(ellipse 70% 50% at 90% -20%, var(--sw-indigo-subtle), transparent)',
+                        }}
+                    />
+                    <div className="relative z-10">
+                        <div className="flex items-center gap-2 mb-4">
+                            <span
+                                className={cn('sw-badge', {
+                                    'sw-badge-completed': task?.task_status === 'completed',
+                                    'sw-badge-amber': task?.task_status === 'extension_requested',
+                                    'sw-badge-indigo': task?.task_status === 'extended',
+                                    'sw-badge-pending': task?.task_status === 'pending' || task?.task_status === 'in_progress',
+                                })}
+                            >
+                                {task?.task_status?.replace('_', ' ')}
+                            </span>
+                        </div>
+                        <h1
+                            className="text-2xl font-bold leading-snug mb-3"
+                            style={{ color: 'var(--sw-text-1)', fontFamily: 'var(--font-dm-sans)' }}
+                        >
+                            {task?.description}
+                        </h1>
+                        <p className="text-sm leading-relaxed" style={{ color: 'var(--sw-text-2)' }}>
+                            {task?.detailed_context}
+                        </p>
+                    </div>
+                </div>
+
+                {/* Success alert */}
                 {successMsg && (
-                    <div className="p-6 bg-emerald-500/10 border border-emerald-500/20 rounded-[2rem] flex items-center gap-4 text-emerald-400 animate-in fade-in slide-in-from-top-4">
-                        <CheckCircle2 className="w-6 h-6" />
-                        <p className="font-semibold">{successMsg}</p>
+                    <div
+                        className="flex items-center gap-3 px-5 py-4 rounded-2xl border sw-animate-slide-down"
+                        style={{ background: 'var(--sw-emerald-subtle)', borderColor: 'var(--sw-emerald)', color: 'var(--sw-emerald)' }}
+                    >
+                        <CheckCircle2 className="w-5 h-5 shrink-0" />
+                        <p className="text-sm font-semibold">{successMsg}</p>
                     </div>
                 )}
 
-                {/* Task Info Grid */}
-                <div className="grid md:grid-cols-2 gap-6 text-sm">
-                    <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl space-y-4">
-                        <h3 className="font-bold text-slate-400 flex items-center gap-2">
-                            <Calendar className="w-4 h-4 text-indigo-400" /> Current Deadline
-                        </h3>
-                        <p className="text-2xl font-black text-slate-100">
+                {/* Info grid */}
+                <div className="grid sm:grid-cols-2 gap-4">
+                    <div
+                        className="p-5 rounded-2xl border"
+                        style={{ background: 'var(--sw-bg-2)', borderColor: 'var(--sw-border)' }}
+                    >
+                        <p
+                            className="text-[10px] font-bold uppercase tracking-widest mb-3 flex items-center gap-1.5"
+                            style={{ color: 'var(--sw-text-3)' }}
+                        >
+                            <Calendar className="w-3.5 h-3.5" style={{ color: 'var(--sw-indigo)' }} />
+                            Deadline
+                        </p>
+                        <p className="text-xl font-bold" style={{ color: 'var(--sw-text-1)' }}>
                             {new Date(task?.deadline || '').toLocaleDateString(undefined, {
-                                weekday: 'long',
+                                weekday: 'short',
                                 month: 'short',
                                 day: 'numeric',
+                            })}
+                        </p>
+                        <p className="text-sm mt-1" style={{ color: 'var(--sw-text-3)' }}>
+                            {new Date(task?.deadline || '').toLocaleTimeString(undefined, {
                                 hour: '2-digit',
-                                minute: '2-digit'
+                                minute: '2-digit',
                             })}
                         </p>
                     </div>
-                    <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl space-y-4">
-                        <h3 className="font-bold text-slate-400 flex items-center gap-2">
-                            <CheckCircle className="w-4 h-4 text-emerald-400" /> Origin Meeting
-                        </h3>
-                        <p className="text-xl font-bold text-slate-200">{task?.meeting_title}</p>
-                        <p className="text-xs text-slate-500 line-clamp-2">{task?.meeting_summary}</p>
+
+                    <div
+                        className="p-5 rounded-2xl border"
+                        style={{ background: 'var(--sw-bg-2)', borderColor: 'var(--sw-border)' }}
+                    >
+                        <p
+                            className="text-[10px] font-bold uppercase tracking-widest mb-3 flex items-center gap-1.5"
+                            style={{ color: 'var(--sw-text-3)' }}
+                        >
+                            <CheckCircle className="w-3.5 h-3.5" style={{ color: 'var(--sw-emerald)' }} />
+                            Origin Meeting
+                        </p>
+                        <p className="text-base font-bold leading-snug" style={{ color: 'var(--sw-text-1)' }}>
+                            {task?.meeting_title}
+                        </p>
+                        <p className="text-xs mt-2 line-clamp-2" style={{ color: 'var(--sw-text-3)' }}>
+                            {task?.meeting_summary}
+                        </p>
                     </div>
                 </div>
 
                 {/* Actions */}
                 {!successMsg && task?.task_status !== 'completed' && (
-                    <div className="bg-slate-900 border border-slate-800 p-8 rounded-[2.5rem] space-y-8">
-                        <div className="flex flex-col sm:flex-row gap-4">
+                    <div
+                        className="rounded-2xl border p-6 space-y-5"
+                        style={{ background: 'var(--sw-bg-2)', borderColor: 'var(--sw-border)', boxShadow: 'var(--sw-shadow)' }}
+                    >
+                        <p
+                            className="text-xs font-bold uppercase tracking-widest"
+                            style={{ color: 'var(--sw-text-3)' }}
+                        >
+                            Your Actions
+                        </p>
+
+                        <div className="flex flex-col sm:flex-row gap-3">
+                            {/* Complete button */}
                             <button
                                 onClick={() => handleStatusUpdate('completed')}
                                 disabled={submitting}
-                                className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white py-5 rounded-2xl font-bold flex items-center justify-center gap-3 transition-all transform hover:scale-[1.02] active:scale-95 disabled:opacity-50"
+                                className="flex-1 flex items-center justify-center gap-2.5 py-3.5 rounded-xl font-bold text-sm transition-all disabled:opacity-50"
+                                style={{ background: 'var(--sw-emerald)', color: '#ffffff' }}
+                                onMouseEnter={(e) => {
+                                    if (!(e.currentTarget as HTMLButtonElement).disabled) {
+                                        (e.currentTarget as HTMLButtonElement).style.opacity = '0.88';
+                                        (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1.02)';
+                                    }
+                                }}
+                                onMouseLeave={(e) => {
+                                    (e.currentTarget as HTMLButtonElement).style.opacity = '1';
+                                    (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1)';
+                                }}
                             >
-                                {submitting ? <Loader2 className="w-6 h-6 animate-spin" /> : <CheckCircle className="w-6 h-6" />}
+                                {submitting
+                                    ? <Loader2 className="w-4 h-4 animate-spin" />
+                                    : <CheckCircle className="w-4 h-4" />}
                                 Mark as Completed
                             </button>
 
+                            {/* Extension button */}
                             <button
                                 onClick={() => setShowExtension(true)}
                                 disabled={submitting || showExtension}
-                                className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-100 py-5 rounded-2xl font-bold flex items-center justify-center gap-3 transition-all transform hover:scale-[1.02] active:scale-95 disabled:opacity-50"
+                                className="flex-1 flex items-center justify-center gap-2.5 py-3.5 rounded-xl font-bold text-sm transition-all disabled:opacity-50"
+                                style={{
+                                    background: 'var(--sw-bg-3)',
+                                    color: 'var(--sw-text-1)',
+                                    border: '1px solid var(--sw-border)',
+                                }}
                             >
-                                <Clock className="w-6 h-6" />
+                                <Clock className="w-4 h-4" />
                                 Request Extension
                             </button>
                         </div>
 
+                        {/* Extension form */}
                         {showExtension && (
-                            <form onSubmit={handleRequestExtension} className="space-y-6 pt-6 border-t border-slate-800 animate-in fade-in slide-in-from-bottom-4">
+                            <form
+                                onSubmit={handleRequestExtension}
+                                className="pt-5 border-t space-y-4 sw-animate-fade-up"
+                                style={{ borderColor: 'var(--sw-border)' }}
+                            >
                                 <div className="space-y-2">
-                                    <label className="text-sm font-bold text-slate-400 uppercase tracking-widest pl-2">
+                                    <label
+                                        className="text-[10px] font-bold uppercase tracking-widest"
+                                        style={{ color: 'var(--sw-text-3)' }}
+                                    >
                                         Reason for Delay
                                     </label>
                                     <textarea
                                         required
                                         value={reason}
                                         onChange={(e) => setReason(e.target.value)}
-                                        placeholder="Briefly explain why you need more time..."
-                                        className="w-full h-32 bg-slate-950 border border-slate-800 rounded-2xl p-4 text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all resize-none"
+                                        placeholder="Briefly explain why you need more time…"
+                                        className="w-full h-28 px-4 py-3 rounded-xl text-sm resize-none focus:outline-none transition-all font-mono-dm"
+                                        style={{
+                                            background: 'var(--sw-bg-3)',
+                                            border: '1px solid var(--sw-border)',
+                                            color: 'var(--sw-text-1)',
+                                        }}
+                                        onFocus={(e) => { (e.target as HTMLTextAreaElement).style.borderColor = 'var(--sw-indigo)'; }}
+                                        onBlur={(e) => { (e.target as HTMLTextAreaElement).style.borderColor = 'var(--sw-border)'; }}
                                     />
                                 </div>
 
                                 <div className="space-y-2">
-                                    <label className="text-sm font-bold text-slate-400 uppercase tracking-widest pl-2">
+                                    <label
+                                        className="text-[10px] font-bold uppercase tracking-widest"
+                                        style={{ color: 'var(--sw-text-3)' }}
+                                    >
                                         Requested New Deadline
                                     </label>
                                     <input
@@ -219,23 +349,38 @@ export default function TaskUpdatePage() {
                                         type="datetime-local"
                                         value={newDeadline}
                                         onChange={(e) => setNewDeadline(e.target.value)}
-                                        className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-4 text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
+                                        className="w-full px-4 py-3 rounded-xl text-sm focus:outline-none transition-all font-mono-dm"
+                                        style={{
+                                            background: 'var(--sw-bg-3)',
+                                            border: '1px solid var(--sw-border)',
+                                            color: 'var(--sw-text-1)',
+                                        }}
+                                        onFocus={(e) => { (e.target as HTMLInputElement).style.borderColor = 'var(--sw-indigo)'; }}
+                                        onBlur={(e) => { (e.target as HTMLInputElement).style.borderColor = 'var(--sw-border)'; }}
                                     />
                                 </div>
 
-                                <div className="flex gap-4">
+                                <div className="flex gap-3">
                                     <button
                                         type="submit"
                                         disabled={submitting}
-                                        className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-3 transition-all"
+                                        className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all disabled:opacity-50"
+                                        style={{ background: 'var(--sw-indigo)', color: '#ffffff' }}
                                     >
-                                        {submitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
+                                        {submitting
+                                            ? <Loader2 className="w-4 h-4 animate-spin" />
+                                            : <Send className="w-4 h-4" />}
                                         Submit Request
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => setShowExtension(false)}
-                                        className="px-8 py-4 bg-slate-800 text-slate-100 rounded-xl font-bold hover:bg-slate-700 transition-all"
+                                        className="px-6 py-3 rounded-xl font-bold text-sm transition-all"
+                                        style={{
+                                            background: 'var(--sw-bg-3)',
+                                            color: 'var(--sw-text-1)',
+                                            border: '1px solid var(--sw-border)',
+                                        }}
                                     >
                                         Cancel
                                     </button>

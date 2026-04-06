@@ -1,22 +1,23 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { DM_Sans, DM_Mono } from "next/font/google";
 import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
 import Providers from "@/components/Providers";
+import ThemeProvider from "@/components/ThemeProvider";
+
+const dmSans = DM_Sans({
+  variable: "--font-dm-sans",
+  subsets: ["latin"],
+});
+
+const dmMono = DM_Mono({
+  variable: "--font-dm-mono",
+  subsets: ["latin"],
+  weight: ["300", "400", "500"],
+});
 
 export const metadata: Metadata = {
-  title: "SyncWire - MCP Meeting Executioner",
-  description: "Automate task extraction and notifications from transcripts",
+  title: "SyncWire — MCP Meeting Executioner",
+  description: "Automate task extraction and notifications from meeting transcripts",
   manifest: "/manifest.json",
 };
 
@@ -26,12 +27,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-slate-950 text-slate-50`}
-      >
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Prevent FOUC: apply saved theme before first paint */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){var t=localStorage.getItem('sw-theme');if(t!=='light'){document.documentElement.classList.add('dark');}})();`,
+          }}
+        />
+      </head>
+      <body className={`${dmSans.variable} ${dmMono.variable} antialiased`}>
         <Providers>
-          {children}
+          <ThemeProvider>
+            {children}
+          </ThemeProvider>
         </Providers>
       </body>
     </html>
