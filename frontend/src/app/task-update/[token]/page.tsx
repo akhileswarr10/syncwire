@@ -102,7 +102,12 @@ export default function TaskUpdatePage() {
         >
             <div
                 className="w-10 h-10 border-[3px] rounded-full animate-spin"
-                style={{ borderColor: 'var(--sw-border)', borderTopColor: 'var(--sw-indigo)' }}
+                style={{
+                    borderBottomColor: 'var(--sw-border)',
+                    borderLeftColor: 'var(--sw-border)',
+                    borderRightColor: 'var(--sw-border)',
+                    borderTopColor: 'var(--sw-indigo)'
+                }}
             />
             <p className="text-sm font-medium" style={{ color: 'var(--sw-text-3)' }}>
                 Verifying secure link…

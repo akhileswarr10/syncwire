@@ -11,7 +11,8 @@
   <img src="https://img.shields.io/badge/Node.js-339933?style=flat-square&logo=node.js&logoColor=white" />
   <img src="https://img.shields.io/badge/Next.js_16-000000?style=flat-square&logo=next.js&logoColor=white" />
   <img src="https://img.shields.io/badge/Express-000000?style=flat-square&logo=express&logoColor=white" />
-  <img src="https://img.shields.io/badge/MySQL-4479A1?style=flat-square&logo=mysql&logoColor=white" />
+  <img src="https://img.shields.io/badge/PostgreSQL-4479A1?style=flat-square&logo=postgresql&logoColor=white" />
+  <img src="https://img.shields.io/badge/Supabase-3FCF8E?style=flat-square&logo=supabase&logoColor=white" />
   <img src="https://img.shields.io/badge/Tailwind_CSS_4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white" />
   <img src="https://img.shields.io/badge/SambaNova_AI-10B981?style=flat-square&logo=openai&logoColor=white" />
   <img src="https://img.shields.io/badge/MCP_Protocol-8B5CF6?style=flat-square&logo=protocol&logoColor=white" />
@@ -49,7 +50,7 @@ In most organizations, meetings generate action items that get lost in notes. **
 
 1. **Paste or upload** a meeting transcript.
 2. **AI analyzes** the transcript using SambaNova's Meta-Llama 3.3 70B model — extracting tasks, assignees, deadlines, and context.
-3. **Tasks are stored** in a MySQL database with cryptographically secure magic tokens.
+3. **Tasks are stored** in a Supabase PostgreSQL database with cryptographically secure magic tokens.
 4. **Gmail notifications** are sent to each assignee with task details and a unique magic link.
 5. **Google Calendar events** are created at each task's deadline with full context.
 6. **Assignees self-serve** via the magic link to mark tasks complete or request deadline extensions.
@@ -97,7 +98,7 @@ In most organizations, meetings generate action items that get lost in notes. **
                                      └─────────────────────────────┘
 
                                      ┌─────────────────────────────┐
-                                     │         MySQL Database      │
+                                     │     Supabase PostgreSQL     │
                                      │   meetings  |  tasks        │
                                      └─────────────────────────────┘
 ```
@@ -133,7 +134,7 @@ In most organizations, meetings generate action items that get lost in notes. **
 |---|---|
 | **Node.js** | Runtime environment |
 | **Express.js 5** | HTTP server and REST API |
-| **MySQL 2** | Relational database (meetings & tasks) |
+| **Supabase (PostgreSQL)** | Relational database (meetings & tasks) |
 | **OpenAI SDK** | Client for SambaNova API (OpenAI-compatible) |
 | **@modelcontextprotocol/sdk** | MCP client and server implementation |
 | **googleapis** | Google OAuth 2.0 + Gmail + Calendar APIs |
@@ -219,7 +220,7 @@ Before you begin, ensure you have the following installed on your system:
 |---|---|
 | **Node.js** | v18.0+ |
 | **npm** | v9.0+ |
-| **MySQL** | v8.0+ |
+| **Supabase Account** | For PostgreSQL hosting |
 | **Google Cloud Project** | With Gmail API and Calendar API enabled |
 
 ---
@@ -247,20 +248,14 @@ npm install
 cd ..
 ```
 
-### 4. Set Up MySQL Database
+### 4. Set Up Supabase Database
+
+1. Create a new project on [Supabase](https://supabase.com/).
+2. Get your **PostgreSQL Connection String** from Project Settings → Database.
+3. Add the connection string to your `.env` file (see below).
 
 ```bash
-# Log in to MySQL and create the database
-mysql -u root -p
-```
-
-```sql
-CREATE DATABASE meeting_db;
-EXIT;
-```
-
-```bash
-# Initialize tables
+# Initialize tables using the provided script
 npm run init-db
 ```
 
@@ -286,10 +281,7 @@ Create a `.env` file in the project root:
 
 ```env
 # Database
-DB_HOST=localhost
-DB_USER=root
-DB_PASSWORD=your_mysql_password
-DB_NAME=meeting_db
+DATABASE_URL=postgresql://postgres:[PASSWORD]@[HOST]:[PORT]/postgres
 PORT=5000
 
 # MCP Server Commands
@@ -335,7 +327,7 @@ The Next.js dashboard opens on `http://localhost:3000`.
 3. **Paste a meeting transcript** or upload a `.txt` / `.vtt` file.
 4. Click **"Run Executioner"** — watch the animated stepper progress:
    - Step 1: AI parses the transcript
-   - Step 2: Tasks are saved to MySQL
+   - Step 2: Tasks are saved to PostgreSQL
    - Step 3: Email + Calendar notifications are sent
 5. Switch to **"Task Archive"** to see all extracted tasks with search and status filters.
 6. Assignees click their **magic link** (from the email) to mark tasks complete or request extensions.
@@ -416,28 +408,28 @@ Both servers handle OAuth 2.0 flows automatically — on first use, they open a 
 ### `meetings` table
 | Column | Type | Description |
 |---|---|---|
-| `id` | INT (PK, AUTO_INCREMENT) | Meeting ID |
+| `id` | SERIAL (PK) | Meeting ID |
 | `title` | VARCHAR(255) | AI-extracted meeting title |
 | `summary` | TEXT | AI-generated 3-paragraph summary |
-| `transcript` | LONGTEXT | Original meeting transcript |
-| `date` | DATETIME | Processing timestamp |
-| `created_at` | TIMESTAMP | Record creation time |
+| `transcript` | TEXT | Original meeting transcript |
+| `date` | TIMESTAMPTZ | Processing timestamp |
+| `created_at` | TIMESTAMPTZ | Record creation time |
 
 ### `tasks` table
 | Column | Type | Description |
 |---|---|---|
-| `id` | INT (PK, AUTO_INCREMENT) | Task ID |
+| `id` | SERIAL (PK) | Task ID |
 | `meeting_id` | INT (FK → meetings.id) | Parent meeting reference |
 | `assignee_email` | VARCHAR(255) | Task assignee's email |
 | `description` | TEXT | Short task description |
 | `detailed_context` | TEXT | AI-extracted context from the transcript |
-| `deadline` | DATETIME | Task deadline |
-| `email_status` | ENUM | `pending` \| `sent` \| `failed` |
-| `task_status` | ENUM | `pending` \| `in_progress` \| `completed` |
+| `deadline` | TIMESTAMPTZ | Task deadline |
+| `email_status` | VARCHAR(20) | `pending` \| `sent` \| `failed` |
+| `task_status` | VARCHAR(20) | `pending` \| `in_progress` \| `completed` |
 | `magic_token` | VARCHAR(255) | 256-bit hex token for secure access |
 | `calendar_event_id` | VARCHAR(255) | Google Calendar event ID for patching |
 | `reason_for_delay` | TEXT | Assignee's extension reason |
-| `requested_deadline` | DATETIME | Proposed new deadline |
+| `requested_deadline` | TIMESTAMPTZ | Proposed new deadline |
 
 ---
 

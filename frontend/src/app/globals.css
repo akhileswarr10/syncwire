@@ -1,5 +1,5 @@
-@import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@300;400;500&display=swap');
+@import "tailwindcss";
 
 /* ─── Dark mode variant (class-based, toggled by ThemeProvider) ─── */
 @variant dark (&:where(.dark, .dark *));
@@ -49,7 +49,9 @@
 }
 
 /* ─── Base styles ─── */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
@@ -67,13 +69,23 @@ body {
 }
 
 /* ─── Custom scrollbar ─── */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
 ::-webkit-scrollbar-thumb {
   background: var(--sw-border-2);
   border-radius: 99px;
 }
-::-webkit-scrollbar-thumb:hover { background: var(--sw-text-3); }
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--sw-text-3);
+}
 
 /* ─── Focus ring ─── */
 :focus-visible {
@@ -82,13 +94,15 @@ body {
 }
 
 /* ─── Mono utility ─── */
-.font-mono-dm { font-family: 'DM Mono', monospace; }
+.font-mono-dm {
+  font-family: 'DM Mono', monospace;
+}
 
 /* ─── Gradient mesh background utility ─── */
 .sw-mesh-bg {
   background-image:
     radial-gradient(ellipse 80% 50% at 80% -10%, var(--sw-indigo-subtle), transparent),
-    radial-gradient(ellipse 60% 40% at 20% 110%, rgba(99,102,241,0.05), transparent);
+    radial-gradient(ellipse 60% 40% at 20% 110%, rgba(99, 102, 241, 0.05), transparent);
 }
 
 /* ─── Animated stepper connector ─── */
@@ -100,30 +114,85 @@ body {
 
 /* ─── Smooth animate-in ─── */
 @keyframes sw-fade-up {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
+
 @keyframes sw-fade-in {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
+
 @keyframes sw-slide-down {
-  from { opacity: 0; transform: translateY(-8px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
-.sw-animate-fade-up   { animation: sw-fade-up 0.3s ease forwards; }
-.sw-animate-fade-in   { animation: sw-fade-in 0.2s ease forwards; }
-.sw-animate-slide-down{ animation: sw-slide-down 0.25s ease forwards; }
+
+.sw-animate-fade-up {
+  animation: sw-fade-up 0.3s ease forwards;
+}
+
+.sw-animate-fade-in {
+  animation: sw-fade-in 0.2s ease forwards;
+}
+
+.sw-animate-slide-down {
+  animation: sw-slide-down 0.25s ease forwards;
+}
 
 /* ─── Status badge variants (shared) ─── */
 .sw-badge {
-  display: inline-flex; align-items: center; gap: 4px;
-  padding: 3px 10px; border-radius: 99px;
-  font-size: 11px; font-weight: 700;
-  letter-spacing: 0.06em; text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
-.sw-badge-pending    { background: var(--sw-bg-3); color: var(--sw-text-2); }
-.sw-badge-completed  { background: var(--sw-emerald-subtle); color: var(--sw-emerald); }
-.sw-badge-amber      { background: var(--sw-amber-subtle); color: var(--sw-amber); }
-.sw-badge-indigo     { background: var(--sw-indigo-subtle); color: var(--sw-indigo); }
-.sw-badge-red        { background: var(--sw-red-subtle); color: var(--sw-red); }
+
+.sw-badge-pending {
+  background: var(--sw-bg-3);
+  color: var(--sw-text-2);
+}
+
+.sw-badge-completed {
+  background: var(--sw-emerald-subtle);
+  color: var(--sw-emerald);
+}
+
+.sw-badge-amber {
+  background: var(--sw-amber-subtle);
+  color: var(--sw-amber);
+}
+
+.sw-badge-indigo {
+  background: var(--sw-indigo-subtle);
+  color: var(--sw-indigo);
+}
+
+.sw-badge-red {
+  background: var(--sw-red-subtle);
+  color: var(--sw-red);
+}
